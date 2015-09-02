@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [ $# -lt 1 ]
+then
+  echo "usage: $0 <errno>"
+  exit 1 
+fi
+
 errno=$1
 
 # will include other header files as well
