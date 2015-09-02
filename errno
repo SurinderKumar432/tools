@@ -1,0 +1,213 @@
+#!/bin/sh
+### NAME:      errno
+###
+### VERSION:   1.2
+###
+### SYNOPSIS:
+###
+###  errno Errno
+###
+###      Errno: The errno name or number to look up.
+###             Numbers may be in decimal, hex, or octal form.
+###
+###
+### DESCRIPTION:
+###
+### This script looks up errno values on UNIX or Linux systems.  In most
+### cases these are in errno.h but some values are found elsewhere.  The
+### EAI_* errno values from the new resolver are included as are the few
+### h_errno values returned by the old resolver routines.
+###
+###
+### CAVEATS/WARNINGS:
+###
+### Errno values are not constant across all operating systems.  Be sure
+### to look up values on the right operating system.
+###
+###
+### RETURNED VALUES:
+###
+###   0  - Displayed all errnos successfully
+###   1  - Failed to find an errno name or value
+###
+###
+### EXAMPLES:
+###
+### 1. To look up errnos 13 and 0x16 on a system:
+###
+###      errno 13 0x16
+###
+###
+### 2. To look up errno ECONNRESET:
+###
+###      errno ECONNRESET
+###
+###
+### 3. To look up errnos 4 and 73, and h_errno HOST_NOT_FOUND:
+###
+###      errno 4 73 HOST_NOT_FOUND
+###
+
+
+
+
+### Print a syntax message for the user.
+
+  PrintSyntax() {
+    printf "syntax: errno Errno...\n\n"
+    printf "  Errno values may be looked up by name or number\n\n"
+    return 0
+  }
+
+
+### Print syntax when there are no arguments or a single '-?' flag.
+
+  unset HEADERS
+  STATUS=0
+
+  if [ $# -eq 0 ]; then
+    PrintSyntax && exit $STATUS
+  fi
+
+  while getopts : OPT ; do
+    case $OPT in
+      \?) if [ "${OPTARG:-?}" != "?" ]; then
+            STATUS=1
+          fi
+
+          PrintSyntax && exit $STATUS
+          ;;
+    esac
+  done
+
+
+### Display the operating system name, release and chipset.  Construct a
+### list of files to search for errno values on the system.
+
+  case `uname -s` in
+      AIX) VRMF=`oslevel -s` 2>/dev/null ||
+           VRMF=`oslevel -r` 2>/dev/null ||
+           VRMF="`uname -v`.`uname -r`"
+
+           PLATFORM="AIX $VRMF (`uname -p`)"
+
+           HEADERS=/usr/include/errno.h
+           HEADERS="$HEADERS /usr/include/sys/errno.h"
+           HEADERS="$HEADERS /usr/include/netdb.h"
+           ;;
+
+   Darwin) VERSION=`sw_vers -productVersion 2>/dev/null`
+           case "$VERSION" in
+             10.0*) PLATFORM="Mac OS X $VERSION (Cheetah)"
+                    ;;
+             10.1*) PLATFORM="Mac OS X $VERSION (Puma)"
+                    ;;
+             10.2*) PLATFORM="Mac OS X $VERSION (Jaguar)"
+                    ;;
+             10.3*) PLATFORM="Mac OS X $VERSION (Panther)"
+                    ;;
+             10.4*) PLATFORM="Mac OS X $VERSION (Tiger)"
+                    ;;
+             10.5*) PLATFORM="Mac OS X $VERSION (Leopard)"
+                    ;;
+             10.6*) PLATFORM="Mac OS X $VERSION (Snow Leopard)"
+                    ;;
+             10.7*) PLATFORM="Mac OS X $VERSION (Lion)"
+                    ;;
+             10.8*) PLATFORM="OS X $VERSION (Mountain Lion)"
+                    ;;
+             10.9*) PLATFORM="OS X $VERSION (Mavericks)"
+                    ;;
+                 *) PLATFORM="OS X $VERSION"
+                    ;;
+           esac
+
+           HEADERS=/usr/include/sys/errno.h
+           HEADERS="$HEADERS /usr/include/netdb.h"
+           ;;
+
+    HP-UX) if [ ! -x /usr/contrib/bin/machinfo ] ; then
+             CHIP=PA-RISC
+           else
+             /usr/contrib/bin/machinfo 2>/dev/null |
+               grep -i PA-RISC 1>/dev/null 2>&1 && CHIP=PA-RISC
+           fi
+
+           PLATFORM="HP-UX `uname -r` (${CHIP:=Itanium})"
+
+           HEADERS=/usr/include/errno.h
+           HEADERS="$HEADERS /usr/include/sys/errno.h"
+           HEADERS="$HEADERS /usr/include/.unsupp/sys/_errno.h"
+           HEADERS="$HEADERS /usr/include/netdb.h"
+           ;;
+
+    Linux) if [ -x /usr/bin/lsb_release ] ; then
+             DIST=`/usr/bin/lsb_release -sd 2>/dev/null | tr -d \"`
+           elif [ -r /etc/redhat-release ] ; then
+             DIST=`head -1 /etc/redhat-release 2>/dev/null`
+           elif [ -r /etc/SuSE-release ] ; then
+             DIST=`head -1 /etc/SuSE-release 2>/dev/null`
+           elif [ -r /etc/UnitedLinux-release ] ; then
+             DIST=`head -1 /etc/UnitedLinux-release 2>/dev/null`
+           else
+             DIST=`cat /etc/*-release 2>/dev/null | head -1`
+           fi
+
+           PLATFORM="${DIST:=unknown Linux (`uname -m`, `uname -r`)}"
+
+           HEADERS=/usr/include/errno.h
+           HEADERS="$HEADERS /usr/include/asm/errno.h"
+           HEADERS="$HEADERS /usr/include/asm-*/errno.h"
+           HEADERS="$HEADERS /usr/include/asm-generic/errno-base.h"
+           HEADERS="$HEADERS /usr/include/bits/errno.h"
+           HEADERS="$HEADERS /usr/include/linux/errno.h"
+           HEADERS="$HEADERS /usr/include/sys/errno.h"
+           HEADERS="$HEADERS /usr/include/netdb.h"
+           ;;
+
+    SunOS) PLATFORM="Solaris `uname -r | sed 's/5\.//'` (`uname -p`)"
+
+           HEADERS=/usr/include/errno.h
+           HEADERS="$HEADERS /usr/include/sys/errno.h"
+           HEADERS="$HEADERS /usr/include/netdb.h"
+           ;;
+
+        *) printf " * System `uname -s` not supported\n"
+           exit 1
+           ;;
+  esac
+
+
+### First convert all numbers to decimal and all strings to uppercase in
+### order to find results successfully.  Extract only #define's from the
+### headers, then split up the name, value and description.  Display any
+### matching results, with duplicates filtered out.  If the search found
+### nothing, print a message to that effect.
+
+  printf "errno: V1.2 lookup on $PLATFORM\n\n"
+
+  for ARG in $@; do
+    if `printf "%s\n" "$ARG" | grep -Eq '^0[xX][[:xdigit:]]*$|^[[:digit:]]*$'`; then
+      SEARCH=`printf "%d\n" "$ARG" 2>/dev/null` || SEARCH="$ARG"
+    else
+      SEARCH=`printf "%s\n" "$ARG" | env LANG=C tr '[:lower:]' '[:upper:]'`
+    fi
+
+    grep -h -- "$SEARCH" $HEADERS 2>/dev/null | grep '^[ 	]*#define' |
+      sed -e 's/^[ 	]*#define[ 	]*//' -e 's+/\*++' -e 's+\*/++' |
+      grep -E '^E|^HOST_NOT_FOUND|^TRY_AGAIN|^NO_' | sort -u |
+      while read ERRNAME ERRVAL ERRDESC; do
+        case "$SEARCH" in
+          $ERRNAME|$ERRVAL) printf "errno %-18s %-17s %-17s %s\n" "$ARG:" "$ERRNAME" "$ERRVAL" "$ERRDESC";;
+        esac
+      done | uniq | grep '^errno' || {
+        printf "errno: The value $ARG was not found\n"
+        STATUS=1
+      }
+  done
+
+
+### Exit nicely.
+
+  exit $STATUS
+
