@@ -62,7 +62,17 @@ list_ctx_t *app_list_create()
 void
 app_list_print(list_ctx_t *lctx)
 {
+   list_node_t  *head = &lctx->link_lctx;
+   list_node_t  *iter;
    
+   iter = head;
+   
+   while (iter->next != head)
+   {
+      /* get the structure from the offset */
+      
+      printf()
+   }
 }
 
 app_list_destroy(list_ctx_t *lctx)
