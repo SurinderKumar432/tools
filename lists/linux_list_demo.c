@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 
 /* do not use built-in stuff */
@@ -7,11 +6,12 @@
 #define container_of(ptr, type, member) \
  ((type *)((char*)ptr - offset_of(type, member)))
 
+#define list_entry(ptr, type, member) container_of(ptr, type, member)
 
-typedef struct list_node {
-   struct list_node *prev;
-   struct list_node *next;
-} list_node_t; 
+typedef struct list_head {
+   struct list_head *prev;
+   struct list_head *next;
+} list_head_t; 
 
 #define LIST_INIT(_node) \
 do {    \
@@ -45,16 +45,15 @@ do {                                                        \
         list_delete_internal((_node)->prev, (_node)->next) ;  \
         LIST_INIT((_node));                                  \
 } while (0)
-
-typedef struct list_entry {
-          int         value_lentry;
-          list_node_t link_lentry;
-} list_entry_t;
+typedef struct list_node {
+          int         value_lnode;
+          list_head_t link_lnode;
+} list_node_t;
 
 typedef struct list_ctx
 {
       int         count_lctx;
-      list_node_t link_lctx;
+      list_head_t link_lctx;
 } list_ctx_t;
   
 list_ctx_t *app_list_create()
@@ -77,52 +76,81 @@ list_ctx_t *app_list_create()
 void
 app_list_print(list_ctx_t *lctx)
 {
-   list_node_t  *head = &lctx->link_lctx;
-   list_node_t  *iter;
+   list_head_t  *head = &lctx->link_lctx;
+   list_head_t  *iter;
    
-   iter = head;
+   iter = head->next;
    
-   while (iter->next != head)
+   while (iter != head)
    {
-      list_entry_t * lentry ;
+      list_node_t * lnode ;
       
       /* get the structure base address from the member */
-      lentry = container_of(iter, list_entry_t, link_lentry);
-      
-      printf("value %d\n", lentry->value_lentry);
+      lnode = container_of(iter, list_node_t, link_lnode);
+     
+      printf("value %d\n", lnode->value_lnode);
+
+#ifdef DEBUG
+      printf("prev %x next %x\n", iter->prev, iter->next);
+#endif /* DEBUG */
       
       iter = iter->next;
    }
 }
-
 app_list_destroy(list_ctx_t *lctx)
 {
+  list_head_t *head = &lctx->link_lctx;
+  list_head_t *iter;
+
   //assert(lctx->count_lctx == 0);
-  
+
+  iter = head->next;
+  while (iter != head)
+  {
+    list_node_t *lnode;
+    list_head_t *iter_next;
+
+    iter_next = iter->next;
+
+    list_delete(iter);
+
+    lnode = list_entry(iter, list_node_t, link_lnode);
+
+    app_entry_free(lnode);
+
+    iter = iter_next;
+  }
+
   free(lctx);
 }
 
 #define      app_list_entries_incr(lctx) ({ lctx->count_lctx++; })
-list_entry_t * app_entry_alloc()
-{
-  list_entry_t *lentry;
-  
-  lentry = malloc(sizeof (list_entry_t));
 
-  if (!lentry)
+
+
+list_node_t * app_entry_alloc()
+{
+  list_node_t *lnode;
+  
+  lnode = malloc(sizeof (list_node_t));
+
+  if (!lnode)
   {
      perror("malloc");
      return NULL;
   }
   
-  return lentry;
+  return lnode;
 }
 
 int
-app_entry_free(list_entry_t *lentry)
+app_entry_free(list_node_t *lnode)
 {
-   LIST_INIT(&lentry->link_lentry);
-   free(lentry);
+
+   printf("freeing value %d\n", lnode->value_lnode);
+
+   LIST_INIT(&lnode->link_lnode);
+   free(lnode);
 }
 
 int main(int argc, char *argv[])
@@ -134,11 +162,11 @@ int main(int argc, char *argv[])
    
    for (value = 0; value < 50; value++)
    {
-      list_entry_t *lentry;
-      lentry = app_entry_alloc();
-      lentry->value_lentry = value;
-      LIST_INIT(&lentry->link_lentry);
-      list_insert_head(&lctx->link_lctx, &lentry->link_lentry);
+      list_node_t *lnode;
+      lnode = app_entry_alloc();
+      lnode->value_lnode = value;
+      LIST_INIT(&lnode->link_lnode);
+      list_insert_head(&lctx->link_lctx, &lnode->link_lnode);
       app_list_entries_incr(lctx);
    }
    
@@ -146,6 +174,5 @@ int main(int argc, char *argv[])
    
    app_list_destroy(lctx);
 
-  
   exit(0);
 }
