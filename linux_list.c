@@ -30,88 +30,94 @@ do {                                   \
 } while (0) 
 
 
-typedef uint slot_t;
-typedef uint key_t;
 
-struct hash_table_entry {
-          int         key_hte;
-          int         value_hte;
-          link_node_t link_hte;
-};
+typedef struct list_entry {
+          int         value_lentry;
+          link_node_t link_lentry;
+} list_entry_t;
 
-
-#define HASH_SIZE(ht) (ht->slots_htbl)
-#define HASH_FUNC(ht, key)  (key % HASH_SIZE(ht))
-
-struct htbl
+typedef struct list_ctx
 {
-      int         count_htbl;
-      int         slots_htbl;
-      link_node_t *link_htbl;
-};
+      int         count_lctx;
+      link_node_t link_lctx;
+} list_ctx_t;
   
-htbl *ht_create(int num_slots)
+list_ctx_t *app_list_create()
 {
-  htbl *ht;
-
-  ht = malloc(sizeof hash_table)
-  if (!ht)
+  list_ctx_t *lctx;
+  
+  lctx = malloc(sizeof list_ctx_t);
+  if (!lctx)
   {
      perror("malloc");
      return NULL;
   }
   
-  ht->link_ht = malloc(sizeof (link_node_t) * num_slots);
+  lctx->count_lctx = 0;
+  LIST_INIT(lctx->link_lctx);
   
-  if (!ht->links_ht)
+  return lctx;
+}
+
+void
+app_list_print(list_ctx_t *lctx)
+{
+   
+}
+
+app_list_destroy(list_ctx_t *lctx)
+{
+  assert(lctx->count_lctx == 0);
+  
+  free(lctx);
+}
+
+#define      app_list_entries_incr(lctx) lctx->count_lctx++
+
+
+list_entry_t * app_entry_alloc()
+{
+  list_entry_t *lentry;
+  
+  lentry = malloc(sizeof lentry)
+  if (!entry)
   {
      perror("malloc");
-     free(ht);
      return NULL;
   }
   
-  ht->slots_ht = num_slots;
-  
-  return ht;
+  return lentry;
 }
 
-init ht_init(htbl *ht)
+int
+app_entry_free()
 {
-  ht->count_ht = 0;
-  
-  for (slot = 0; slot < HASH_SIZE(ht); slot++)
-  {
-      LIST_INIT(ht->link[slot]);
-  }
-  
-}
-
-ht_destroy(htbl *ht)
-{
-  free(ht->links_ht);
-  free(ht);
-}
-
-ht_entry_t * ht_alloc_entry()
-{
-
-}
-
-ht_free_entry()
-{
-
+   LIST_INIT(lentry->link_lentry);
+   free(lentry);
 }
 
 int main(int argc, char *argv[])
 {
+   int value;
+   list_ctx_t *lctx;
+   
+   lctx = app_list_create();
+   
+   
+   for (value = 0; value < 50; value++)
+   {
+      list_entry_t *lentry;
+      lentry = app_entry_alloc();
+      lentry->value_lentry = value;
+      LIST_INIT(lentry->link_lentry);
+      list_insert(&lctx->link_lctx, &lentry->link_lentry);
+      app_list_entries_incr(lctx);
+   }
+   
+   app_list_print(lctx);
+   
+   app_list_destroy(lctx);
 
-
-  for (key = 0; key < 100; key++)
-  {
-      slot = HASH_FUNC(key);
-      
-  }
-  
   
   exit(0);
 }
