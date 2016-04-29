@@ -1,0 +1,28 @@
+
+1> Include  mcheck.h in .c file where mtrace() will enable the tracing.
+
+$ cat file.c
+
+  #include <mcheck.h>
+  
+  main()
+  {
+     mtrace();
+     ...
+  }
+  
+  $
+  
+2> Create an executable
+   gcc -o exec file.c
+   
+3>  export MALLOC_TRACE=/tmp/mtrace.out
+    touch /tmp/mtrace.out
+4> Run Executable
+  $ exec    
+  
+5> Analyze report 
+  $ mtrace exec /tmp/mtrace.out
+    
+    
+
