@@ -1,6 +1,7 @@
+# surinder : basic tool to track malloc and free in a daemon
 set pagination off
 set logging overwrite on
-# set logging file gdb_app.log
+set logging file gdb_app.log
 set logging on
 set $m_adr = malloc
 set $f_adr = free
