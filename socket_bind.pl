@@ -7,7 +7,7 @@ use Sys::Hostname;
 
 if (scalar @ARGV < 2)
 {
-  print "usage: $PROGNAME <host> <port>";
+  print "usage: $0 <host> <port>";
   exit 1;
 }
 
