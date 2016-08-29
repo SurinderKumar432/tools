@@ -25,13 +25,25 @@ elsif ($host eq "loopback")
 {
   $host = "127.0.0.1";
 }
+elsif ($host eq "none")
+{
+  $host = "none";
+}
 
 $port = $ARGV[1] ;
 
 print "$host:$port\n";
 
-# my $socket = IO::Socket::INET->new(Proto => "tcp", LocalPort=> $port);
-my $socket = IO::Socket::INET->new(Proto => "tcp", LocalAddr => $host, LocalPort=> $port)  or die "Cannot create socket: $@";
+my $socket;
+
+if ($host eq "none")
+{
+  $socket = IO::Socket::INET->new(Proto => "tcp", LocalPort=> $port) or die "Cannot create socket: $@";
+}
+else
+{
+  $socket = IO::Socket::INET->new(Proto => "tcp", LocalAddr => $host, LocalPort=> $port)  or die "Cannot create socket: $@";
+}
 
 my $mysockaddr = getsockname($socket);
 my ($port, $myaddr) = sockaddr_in($mysockaddr);
