@@ -1,0 +1,56 @@
+
+The User Program's Virtual Memory Layout (uvmlayout) displays
+the virtual memory regions in a format which can be understood
+by the developer.
+
+The end product can be used by a developer to know in which
+memory region(address range) a particual address falls on Linux
+System. It can be really very helpful in porting esp if the
+developer doesn't understand the architecture details on which
+Linux is running.
+
+The STACK, HEAP and MMAP region creates confusion in the mind
+of developer.
+
+In the older Linux releases mmap and stack used to grow towards
+each other. Now, mmap and heap grows towards each other.
+Please refer to an article by Jonathan Corbet.
+http://lwn.net/Articles/91829/
+
+These minor confusions can be cleared by running this program.
+
+Using the uvmlayout:
+===================
+
+Download uvmlayout-$(VERSION).$(RELEASE).tar.gz to $HOME/project.d/
+
+$ gzip -dc uvmlayout-$(VERSION).$(RELEASE).tar.gz | tar -xvf - 
+
+$ cd uvmlayout
+
+Build
+$ make all 
+
+Clean
+$ make clean
+
+Make Ship Bundle
+$ make ship_bundle
+
+Executable
+$ bin/uvmlayout
+
+
+HISTORY:
+========
+0.1
+- Developed product to display virtual memory regions on i386 and x86-64.
+
+
+TODO :
+=======
+. Need to port it on to IA64 and PPC/PPC64, S390/S390X.
+. Develop a library which can be linked with any executable to display these regions
+  in a user-friendly manner at run time in response to an event.
+. Develop a script which can parse output of pmap and `cat /proc/PID/maps` and generate
+  similar data(if possible).
