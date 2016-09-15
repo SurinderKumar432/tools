@@ -6,7 +6,7 @@ CC=gcc
 TOP_DIR=$(PWD)
 
 DOCS=docs
-SOURCE=source
+SOURCE=$(PWD)
 MAKEFILES=Makefile
 TOOLS=tools
 BIN=bin
