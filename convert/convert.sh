@@ -45,3 +45,5 @@ quit
 END
 
 bc -q convert.bc
+
+rm convert.bc
