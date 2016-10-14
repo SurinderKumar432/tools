@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Author: Surinder
+# Hexadecimal to Decimal converter
+# Decimal to Hexadecimal convert
 
 if test $# -ne 3
 then
