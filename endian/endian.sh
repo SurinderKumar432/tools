@@ -5,6 +5,13 @@
 lscpu | grep -e 'Byte Order'
 
 # using gdb
-echo "show endian" > /tmp/gdb.endian
-echo "quit" >> /tmp/gdb.endian
-gdb -q -command=/tmp/gdb.endian
+GDB_INPUT=/tmp/endian-$$.gdb
+
+cat << EOF > $GDB_INPUT
+show endian
+quit
+EOF
+
+gdb -q -command=$GDB_INPUT
+
+rm $GDB_INPUT
