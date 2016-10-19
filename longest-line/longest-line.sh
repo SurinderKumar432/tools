@@ -13,9 +13,9 @@ length=$1
 
 shift
 
-LONGLINE=/tmp/longest-line-$$
+LONGLINE=/tmp/longest-line-$$.awk
 
-cat << EOF > $LONGLINE.awk
+cat << EOF > $LONGLINE
   BEGIN {
   }
 
@@ -33,7 +33,7 @@ EOF
 for file in $*
 do
   echo "$file"
-  cat $file | awk -v expected_length=$length -f $LONGLINE.awk |sort -nr
+  cat $file | awk -v expected_length=$length -f $LONGLINE |sort -nr
 done
 
-rm $LONGLINE.awk
+rm $LONGLINE
