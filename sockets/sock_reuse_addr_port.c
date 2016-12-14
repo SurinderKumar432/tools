@@ -29,11 +29,13 @@ bind_wrap_v6(int reuse_addr, int reuse_port, char *addr, short port)
 #if defined(SO_REUSEADDR)
                 if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR,
                                &reuse_addr, sizeof(reuse_addr)) == -1) {
-                        perror("setsockopt()");                                                         exit(1);                                                                           
+                        perror("setsockopt()");
+                        exit(1);                                                                           
                 }
                 printf("SO_REUSEADDR\n");                                                                  
 #endif /* SO_REUSEADDR */                                                                                  
-        } /* reuse */                 
+        } /* reuse */
+        
         if (reuse_port)
         {              
 #if defined(SO_REUSEPORT)
