@@ -1,3 +1,4 @@
+#!/bin/sh
 
 if test $# -lt 1
 then
