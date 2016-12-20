@@ -240,3 +240,5 @@ main()
   close(sock_fd);
   exit(0);
 }
+
+/* Some old sample program written longback */
