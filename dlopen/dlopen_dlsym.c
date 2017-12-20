@@ -39,7 +39,7 @@ main(int argc, char **argv)
    }
 
     dlclose(handle);
-    return 0;
+    exit(0);
 }
 
 // gcc -o dlopen_dlsym -m64 dlopen_dlsym.c -ldl
