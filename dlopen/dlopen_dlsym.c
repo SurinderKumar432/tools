@@ -12,7 +12,7 @@ main(int argc, char **argv)
    
     if (argc < 3)
     {
-      printf("usage: %s <lib> <func | none>\n", argv[0]);
+      printf("usage: %s <lib> <symbol | none>\n", argv[0]);
       exit(1);
     }
 
