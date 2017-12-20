@@ -34,8 +34,7 @@ main(int argc, char **argv)
       }
       else
       {
-        fprintf (stderr, "symbol %s NOT found errod %s\n", lib_sym, dlerror());
-        exit(1);
+        fprintf (stderr, "symbol %s NOT found error %s\n", lib_sym, dlerror());
       }
    }
 
