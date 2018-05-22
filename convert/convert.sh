@@ -36,7 +36,8 @@ esac
 
 
 # NOTE: keep obase before ibase otherwise obase number will be misinterepreted
-cat << END  > convert.bc
+CONV_FILE=convert_$$.bc
+cat << END  > $CONV_FILE
 obase=$OBASE
 ibase=$IBASE
 print $NUMBER
@@ -44,6 +45,6 @@ print "\n"
 quit
 END
 
-bc -q convert.bc
+bc -q $CONV_FILE
 
-rm convert.bc
+rm $CONV_FILE
