@@ -36,7 +36,7 @@ esac
 
 
 # NOTE: keep obase before ibase otherwise obase number will be misinterepreted
-CONV_FILE=convert_$$.bc
+CONV_FILE=/tmp/convert_$$.bc
 cat << END  > $CONV_FILE
 obase=$OBASE
 ibase=$IBASE
